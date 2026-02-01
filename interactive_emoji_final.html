@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Color Emoji - Custom SVG Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);  /* 改成6列 */
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* 前三个表情各占2列 */
+        .emoji-card:nth-child(1),
+        .emoji-card:nth-child(2),
+        .emoji-card:nth-child(3) {
+            grid-column: span 2;
+        }
+
+        /* 第4个表情从第2列开始，占2列（居中靠左） */
+        .emoji-card:nth-child(4) {
+            grid-column: 2 / 4;
+        }
+
+        /* 第5个表情从第4列开始，占2列（居中靠右） */
+        .emoji-card:nth-child(5) {
+            grid-column: 4 / 6;
+        }
+
+
+
+
+
+
+
+        .emoji-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+
+        .emoji-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+
+        .emoji-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+
+        .emoji-display {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+        }
+
+
+        .emoji-display svg {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        .color-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+
+        .color-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: #333;
+        }
+
+
+        .reset-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+
+        .instructions h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+
+
+        .instructions p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+
+        .instructions code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .copyright {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            color: #999;
+            font-size: 0.85em;
+            border-top: 1px solid #eee;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Interactive Color Emoji</h1>
+        <p class="subtitle">Click colors to change emoji</p>
+
+
+        <div class="emoji-grid" id="emojiGrid"></div>
+
+        <div class="copyright">
+            <p>
+                Emojis © <a href="https://openmoji.org" target="_blank">OpenMoji</a> contributors | 
+                Code © 2026 Korbin | 
+                Licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>
+            </p>
+        </div>
+
+
+
+
+
+    </div>
+
+
+
+
+    <script>
+        // ============ 在这里添加你的表情 ============
+        const emojis = [
+            { 
+                name: 'Happy', 
+                svg: `<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line">
+    <circle cx="36" cy="36" r="23" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M45.8149,44.9293 c-2.8995,1.6362-6.2482,2.5699-9.8149,2.5699s-6.9153-0.9336-9.8149-2.5699"/>
+    <path d="M30,31c0,1.6568-1.3448,3-3,3c-1.6553,0-3-1.3433-3-3c0-1.6552,1.3447-3,3-3C28.6552,28,30,29.3448,30,31"/>
+    <path d="M48,31c0,1.6568-1.3447,3-3,3s-3-1.3433-3-3c0-1.6552,1.3447-3,3-3S48,29.3448,48,31"/>
+  </g>
+</svg>`
+            },
+
+
+            { 
+                name: 'Sad', 
+                svg: `<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line">
+    <circle cx="36" cy="36" r="23" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="2"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M26.5,48c1.8768-3.8326,5.8239-6.1965,10-6c3.8343,0.1804,7.2926,2.4926,9,6"/>
+    <path fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="2" d="M20.3869,41.6299 c-0.5326-0.5326-0.8258-1.2405-0.8256-1.9936c0-2.4789,2.3433-4.8508,2.443-4.9505c0.2074-0.2074,0.5431-0.2072,0.7503,0 c0.0998,0.0998,2.4432,2.4718,2.4437,4.9512l0.0002,0.0002c-0.0007,1.5535-1.2653,2.8177-2.8189,2.8175 C21.6273,42.4556,20.9195,42.1624,20.3869,41.6299z"/>
+    <path d="M30,31c0,1.6568-1.3448,3-3,3c-1.6553,0-3-1.3433-3-3c0-1.6552,1.3447-3,3-3C28.6552,28,30,29.3448,30,31"/>
+    <path d="M48,31c0,1.6568-1.3447,3-3,3s-3-1.3433-3-3c0-1.6552,1.3447-3,3-3S48,29.3448,48,31"/>
+  </g>
+</svg>`
+            },
+
+
+
+            { 
+                name: 'Angry', 
+                svg: `<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line">
+    <circle cx="36" cy="36" r="23" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="2"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M28,46c1.5805-2.5575,4.9043-4.1349,8.4211-4.0038C39.6499,42.1166,42.5622,43.6595,44,46"/>
+    <path d="M30,32.9252c0,1.6567-1.3448,3-3,3c-1.6553,0-3-1.3433-3-3c0-1.6553,1.3447-3,3-3C28.6552,29.9252,30,31.27,30,32.9252"/>
+    <path d="M48,32.9252c0,1.6567-1.3447,3-3,3s-3-1.3433-3-3c0-1.6553,1.3447-3,3-3S48,31.27,48,32.9252"/>
+    <line x1="23" x2="30" y1="24" y2="28" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <line x1="49" x2="42" y1="24" y2="28" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+  </g>
+</svg>`
+            },
+
+            { 
+                name: 'Scared', 
+                svg: `<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line">
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21,24c1-1,4.998-5.603,11-1.002"/>
+    <path fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="2" d="m33.25,31.46c0,3.452-2.802,6.25-6.25,6.25s-6.25-2.798-6.25-6.25c0-3.448,2.802-6.25,6.25-6.25s6.25,2.802,6.25,6.25"/>
+    <path d="m29,31.46c0,1.104-.8965,2-2,2s-2-.8955-2-2,.8965-2,2-2,2,.8965,2,2"/>
+    <path fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="2" d="m51.25,31.46c0,3.452-2.802,6.25-6.25,6.25s-6.25-2.798-6.25-6.25c0-3.448,2.802-6.25,6.25-6.25s6.25,2.802,6.25,6.25"/>
+    <path d="m47,31.46c0,1.104-.8965,2-2,2s-2-.8955-2-2,.8965-2,2-2,2,.8965,2,2"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m28,50c.2704-.3562,1-8,8.421-8.004,6.579-.0033,7.229,7.541,7.579,8.004,0,0-16,0-16,0Z"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m47.33,56.02c-3.344,1.896-7.21,2.979-11.33,2.979-3.994,0-7.749-1.018-11.02-2.808"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m13.21,39.07c-.1076-1.378-.245-1.638-.2117-3.073.2947-12.7,10.3-23,23-23s23,10.3,23,23c0,1.073-.0735,2.129-.2156,3.163"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m49.81,64.32c1.208-3.956.9131-2.154,1.359-4.899-.3878-1.364-.8299-3.474-.6628-5.992.131-1.973,2.418-3.208,2.841-7.757.4175-4.077.4286-5.896,1.137-5.899,1.271-.0062,3.125,4.327,3.762,8.028.6764,3.93-1.667,9.391-1.667,9.391l1.365,4.535"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m22.57,64.32c-1.208-3.956-.9131-2.154-1.359-4.899.3878-1.364.8299-3.474.6628-5.992-.131-1.973-2.418-3.208-2.841-7.757-.4175-4.077-.4286-5.896-1.137-5.899-1.271-.0062-3.125,4.327-3.762,8.028-.6764,3.93,1.667,9.391,1.667,9.391l-1.365,4.535"/>
+    <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m51.48,24c-1-1-4.998-5.603-11-1.002"/>
+  </g>
+</svg>`
+            },
+
+
+            { 
+                name: 'Worried', 
+                svg: `<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line">
+    <path d="M30,31c0,1.6568-1.3448,3-3,3c-1.6553,0-3-1.3433-3-3c0-1.6552,1.3447-3,3-3C28.6552,28,30,29.3448,30,31"/>
+    <path d="M48,31c0,1.6568-1.3447,3-3,3s-3-1.3433-3-3c0-1.6552,1.3447-3,3-3S48,29.3448,48,31"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M26.5,48c1.8768-3.8326,5.8239-6.1965,10-6c3.8343,0.1804,7.2926,2.4926,9,6"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M23.1483,24.2501c0.4872,0.2275,2.6277,1.1608,5.1639,0.3327c2.0576-0.6718,3.1771-2.1117,3.5396-2.6239"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M48.8517,24.2501c-0.4872,0.2275-2.6277,1.1608-5.1639,0.3327c-2.0576-0.6718-3.1771-2.1117-3.5396-2.6239"/>
+    <path fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="2" d="M9.2458,27.724 c-0.2538-1.041-0.087-2.1185,0.4698-3.0339c1.8322-3.0136,6.4342-4.1651,6.629-4.2126c0.4053-0.0988,0.8134,0.1495,0.9122,0.5546 c0.0476,0.1952,1.1432,4.8107-0.6888,7.8253l0.0001,0.0004c-1.1491,1.888-3.6208,2.4902-5.5094,1.3416 C10.1434,29.6445,9.4996,28.765,9.2458,27.724z"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M21.9967,17.7451 c3.8787-2.9798,8.7341-4.7512,14.0033-4.7512c12.7059,0,23.0061,10.3002,23.0061,23.0061S48.7059,59.0061,36,59.0061 S12.9939,48.7059,12.9939,36c0-0.396,0.01-0.7896,0.0298-1.1807"/>
+  </g>
+</svg>`
+            },
+        ];
+
+
+        const colors = [
+            { name: 'Red', value: '#e74c3c' },
+            { name: 'Yellow', value: '#f39c12' },
+            { name: 'Blue', value: '#3498db' },
+            { name: 'Green', value: '#27ae60' },
+            { name: 'Purple', value: '#9b59b6' },
+            { name: 'Orange', value: '#e67e22' },
+            { name: 'Gray', value: '#95a5a6' },
+            { name: 'Black', value: '#2c3e50' }
+        ];
+
+
+        const emojiGrid = document.getElementById('emojiGrid');
+
+
+        emojis.forEach((emoji, index) => {
+            const card = document.createElement('div');
+            card.className = 'emoji-card';
+
+
+            const emojiId = `emoji-${index}`;
+
+
+            let svgContent;
+            if (emoji.svg) {
+                svgContent = emoji.svg;
+            } else if (emoji.path) {
+                svgContent = `
+                    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="60" r="55" fill="none" stroke="black" stroke-width="3"/>
+                        <path d="${emoji.path}" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                `;
+            }
+
+
+            card.innerHTML = `
+                <div class="emoji-name">${emoji.name}</div>
+                <div class="emoji-display" id="${emojiId}">
+                    ${svgContent}
+                </div>
+                <div class="color-buttons" id="colors-${index}"></div>
+                <button class="reset-btn" onclick="resetEmoji('${emojiId}', ${index})">Reset</button>
+            `;
+
+
+            emojiGrid.appendChild(card);
+
+
+            const colorButtons = document.getElementById(`colors-${index}`);
+            colors.forEach(color => {
+                const btn = document.createElement('button');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = color.value;
+                btn.textContent = color.name;
+                btn.onclick = () => changeEmojiColor(emojiId, index, color.value);
+                colorButtons.appendChild(btn);
+            });
+        });
+
+
+        function changeEmojiColor(emojiId, index, color) {
+            // ⭐ 关键改动：先重置，再变色
+            resetEmoji(emojiId, index);
+
+
+            // 等待重置完成后再变色（使用setTimeout确保DOM更新）
+            setTimeout(() => {
+                const container = document.getElementById(emojiId);
+            const svg = container.querySelector('svg');
+
+
+            // 获取所有path、circle和line元素
+            const paths = svg.querySelectorAll('path');
+            const circles = svg.querySelectorAll('circle');
+            const lines = svg.querySelectorAll('line');
+
+
+            // 处理path元素
+            paths.forEach(path => {
+                const originalFill = path.getAttribute('fill');
+
+
+                // 改变线条颜色为深色
+                path.setAttribute('stroke', color);
+
+
+                // 如果原本是fill="none"，添加浅色填充
+                if (originalFill === 'none') {
+                    path.setAttribute('fill', color);
+                    path.setAttribute('fill-opacity', '0.15');  // 15%透明度，更浅
+                } 
+                // 如果原本有填充（实心部分如眼珠），设置为深色
+                else if (originalFill !== null && originalFill !== 'none') {
+                    path.setAttribute('fill', color);
+                    path.setAttribute('fill-opacity', '1');  // 完全不透明
+                }
+                // 如果没有fill属性，设置浅色填充
+                else {
+                    path.setAttribute('fill', color);
+                    path.setAttribute('fill-opacity', '0.15');
+                }
+            });
+
+
+            // 处理circle元素
+            circles.forEach(circle => {
+                const originalFill = circle.getAttribute('fill');
+
+
+                circle.setAttribute('stroke', color);
+
+
+                // circle的填充：如果是fill="none"，添加浅色填充
+                if (originalFill === 'none') {
+                    circle.setAttribute('fill', color);
+                    circle.setAttribute('fill-opacity', '0.15');
+                }
+                // 如果有其他填充值，设置深色
+                else if (originalFill !== null && originalFill !== 'none') {
+                    circle.setAttribute('fill', color);
+                    circle.setAttribute('fill-opacity', '1');
+                }
+            });
+
+
+            // 处理line元素（只改变线条颜色）
+            lines.forEach(line => {
+                line.setAttribute('stroke', color);
+            });
+            }, 5);  // 10毫秒延迟，确保重置完成
+        }
+
+
+        function resetEmoji(emojiId, index) {
+            const container = document.getElementById(emojiId);
+            const emoji = emojis[index];
+
+
+            // 重新生成原始SVG
+            let svgContent;
+            if (emoji.svg) {
+                svgContent = emoji.svg;
+            } else if (emoji.path) {
+                svgContent = `
+                    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="60" r="55" fill="none" stroke="black" stroke-width="3"/>
+                        <path d="${emoji.path}" fill="none" stroke="black" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                `;
+            }
+
+
+            container.innerHTML = svgContent;
+        }
+    </script>
+</body>
+</html>
